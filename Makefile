@@ -8,9 +8,12 @@ dropdb:
 	docker exec -it postgres15 dropdb bank15
 
 migrateup:
-	migrate -path db/migrations -database "postgresql://root:secret@localhost:5432/bank15?sslmode=disable" -verbose up
+	docker run -v ${PWD}/db/migrations:/migrations --network host migrate/migrate -path=/migrations/ -database "postgresql://root:secret@localhost:5432/bank15?sslmode=disable" -verbose up
 	
 migratedown:
-	migrate -path db/migrations -database "postgresql://root:secret@localhost:5432/bank15?sslmode=disable" -verbose down
+	docker run -v ${PWD}/db/migrations:/migrations --network host migrate/migrate -path=/migrations/ -database "postgresql://root:secret@localhost:5432/bank15?sslmode=disable" -verbose down -all
 
-.PHONY: createdb, dropdb, postgres, migratedown, migrateup
+sqlc-generate:
+	docker run --rm -v ${PWD}:/src -w /src kjconroy/sqlc generate
+
+.PHONY: createdb, dropdb, postgres, migratedown, migrateup, sqlc-generate
